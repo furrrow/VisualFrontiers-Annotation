@@ -1,0 +1,5 @@
+# Ignore everything inside the Annotations directory
+/SCAND/Annotations/**
+
+#Tracking directory
+!/SCAND/Annotations/.gitkeep
