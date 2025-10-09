@@ -308,6 +308,24 @@ class Annotator:
                 json.dump(self.bag_doc, f, ensure_ascii=False, indent=2)
             self.bag_doc = None
     
+    def _clear_last(self):
+        self.last_click_uv = None
+        self.last_target_base = None
+        self.last_selection_record = None
+        self.last_carry_pts2d = None
+        self.last_carry_left2d = None
+        self.last_carry_right2d = None
+        self.last_carry_poly2d = None
+        self.last_carry_robot_width = None
+
+        self.current_click_uv = None
+        self.current_target_base = None
+        self.current_r_theta_vw = None
+        self.latest_pts2d = None
+        self.latest_poly2d = None
+        self.latest_left2d = None
+        self.latest_right2d = None
+
     def on_mouse(self, event, x, y, flags, userdata):
         if self.current_img is None:
             return
@@ -420,6 +438,20 @@ class Annotator:
         self.latest_left2d = None
         self.latest_right2d = None
 
+    def log_stop(self):
+        if self.bag_doc is None or self.frame_stamp is None:
+            return
+
+        stamp_key = str(self.frame_stamp)  # keep same format you use in log_frame
+
+        self.bag_doc["annotations_by_stamp"][stamp_key] = {
+            "frame_idx": int(self.frame_idx),
+            "stop": True,
+            "click": None,                     # no pixel click
+            "goal_base": {"x": 0.0, "y": 0.0, "z": 0.0},
+            "arc": {"r": 0.0, "theta": 0.0}
+        }
+
     def process_bag(self, bag_path: str):
         self.bag_name = Path(bag_path).name
         stem = Path(self.bag_name).stem
@@ -483,7 +515,11 @@ class Annotator:
                 elif key == 81:  # Left Arrow → go back one (no save)
                     print("[INFO] Back one frame.")
                     i = max(0, i - 1)
-
+                elif key == ord('0'):  # STOP action
+                    self.log_stop()
+                    self._clear_last()
+                    self.redraw()
+                    continue 
                 else:
                     continue
 
