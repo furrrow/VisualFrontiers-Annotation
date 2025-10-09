@@ -10,23 +10,6 @@
         "camera" : "/camera/rgb/image_raw/compressed", 
         "laserscan" : "/velodyne_2dscan", 
         "odom" : "/jackal_velocity_controller/odom"
-    },
-
-
-    "A_Spot_Stadium_Rec_Fri_Nov_26_135.bag": true,
-    "A_Spot_Fountain_Greg_Mon_Dec_20_138.bag": true,
-    "C_Spot_Foodtruck_Bass_Fri_Nov_26_133.bag": true,
-    "A_Spot_AHG_Library_Tue_Nov_16_118.bag": true,
-    "A_Spot_Fountain_Library_Tue_Nov_16_120.bag": true,
-    "A_Spot_Bass_Garage_Fri_Nov_26_134.bag": true,
-    "A_Spot_AHG_Fountain_Mon_Dec_20_137.bag": true,
-    "A_Spot_Rec_Tent_Fri_Nov_26_136.bag": true,
-    "A_Spot_Library_Fountain_Tue_Nov_16_119.bag": true,
-
-    "A_Jackal_AHG_Library_Thu_Nov_4_16.bag": true,
-    "A_Jackal_Fountain_Library_Thu_Nov_4_19.bag": true,
-    "A_Jackal_Library_Fountain_Thu_Nov_4_18.bag": true,
-    "A_Jackal_Libraryfront_Librarydoors_Thu_Nov_4_20.bag": true,
-    "A_Jackal_Library_AHG_Thu_Nov_4_17.bag": true
+    }
 
 }

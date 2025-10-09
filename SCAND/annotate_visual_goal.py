@@ -25,7 +25,8 @@ from cv_bridge import CvBridge
 bag_dir = "/media/beast-gamma/Media/Datasets/SCAND/annt"   # Point to path with rosbags being annotated for the day
 annotations_root = "./Annotations"
 calib_path = "./tf.json"
-output_csv = "scand_click_arc_annotations.csv"
+skip_json_path = "./bags_to_skip.json"
+
 fx, fy, cx, cy = 640.0, 637.0, 640.0, 360.0                   #  SCAND Kinect intrinsics ### DO NOT CHANGE
 T_horizon = 2.0      # Path generation options
 num_t_samples = 1000
@@ -292,6 +293,7 @@ class Annotator:
 
         self.bag_doc = None
         self.frames : None
+        self.output_path = None
 
     def _open_bag_doc(self):
         self.bag_doc = {
@@ -506,10 +508,17 @@ class Annotator:
 
     def run(self):
         bag_files = sorted(glob.glob(os.path.join(bag_dir, "*.bag")))
+
+        with open(skip_json_path, 'r') as f:
+            bags_to_skip = json.load(f)
         if not bag_files:
             print(f"[ERROR] No .bag files found in {bag_dir}")
             return
         for bp in bag_files:
+            print(os.path.basename(bp))
+            if bags_to_skip.get(os.path.basename(bp), False):
+                print(f"[INFO] Skipping {bp}")
+                continue
             self.frames : list[FrameItem] = []
             self.process_bag(bp)
         print(f"\n[DONE] Annotations written to {self.output_path}")

@@ -19,9 +19,12 @@ def extract_topics_from_bags():
 def check_annotatability():
     existing_bags = get_existing_bags(ROSBAG_PATH)
     topic_json_path = "./topics_for_project.json"
+    skip_json_path = "./bags_to_skip.json"
 
     with open(topic_json_path, 'r') as f:
         topics_for_project = json.load(f)
+    with open(skip_json_path, 'r') as f:
+        bags_to_skip = json.load(f)
     
     for bag in existing_bags:
         if "Spot" in bag:
@@ -46,15 +49,14 @@ def check_annotatability():
                 all_present = False
         if not all_present:
             print(f"[MISSING] {bag} is missing topics: {missing_topics}")
-            skip = topics_for_project.get(f"{bag}", False)
+            skip = bags_to_skip.get(f"{bag}", False)
             if not skip:
                 print(f"[ERROR] {bag} is missing required topics and is not marked to skip!")
         else:
-            skip = topics_for_project.get(f"{bag}", False)
+            skip = bags_to_skip.get(f"{bag}", False)
             if skip:
                 print(f"[WARN] {bag} has all required topics but is marked to skip.")
 
-            
 
 if __name__ == "__main__":
     check_annotatability()
