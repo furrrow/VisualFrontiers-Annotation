@@ -426,7 +426,8 @@ class Annotator:
             "frame_idx": int(self.frame_idx),
             "click": {"u": u, "v": v},
             "goal_base": {"x": xb, "y": yb, "z": 0.0},
-            "arc": {"r": r, "theta": theta}
+            "arc": {"r": r, "theta": theta}, 
+            "robot_width": self.last_carry_robot_width
         }
 
         # clear per-frame transient state

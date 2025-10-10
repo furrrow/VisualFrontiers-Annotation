@@ -57,6 +57,5 @@ def check_annotatability():
             if skip:
                 print(f"[WARN] {bag} has all required topics but is marked to skip.")
 
-
 if __name__ == "__main__":
     check_annotatability()
