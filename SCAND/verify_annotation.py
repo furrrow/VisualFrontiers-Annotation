@@ -29,6 +29,7 @@ class FrameItem:
     width_m : float
     u : float
     v : float
+    stop : bool
 
 def load_calibration(json_path: str, mode: str = "jackal"):
     """
@@ -201,32 +202,41 @@ def draw(frame_item: FrameItem, K: np.ndarray, dist, T_cam_from_base: np.ndarray
     width_m = frame_item.width_m
     r, theta = frame_item.r, frame_item.theta
     u, v = frame_item.u, frame_item.v
+    stop = frame_item.stop
 
-    path_points, v, w, t_samples, theta_samples = point_to_traj(r, theta, T_horizon, num_t_samples, x_base, y_base)
-    left_b, right_b, poly_b = make_corridor_polygon(path_points, theta_samples, width_m, bridge_pts=20)
+    if not stop: 
+        path_points, v, w, t_samples, theta_samples = point_to_traj(r, theta, T_horizon, num_t_samples, x_base, y_base)
+        left_b, right_b, poly_b = make_corridor_polygon(path_points, theta_samples, width_m, bridge_pts=20)
 
-    # 4) Transform to camera and project
-    traj_c = transform_points(T_cam_from_base, path_points)
-    left_c = transform_points(T_cam_from_base, left_b)
-    right_c= transform_points(T_cam_from_base, right_b)
-    poly_c = transform_points(T_cam_from_base, poly_b)
+        # 4) Transform to camera and project
+        traj_c = transform_points(T_cam_from_base, path_points)
+        left_c = transform_points(T_cam_from_base, left_b)
+        right_c= transform_points(T_cam_from_base, right_b)
+        poly_c = transform_points(T_cam_from_base, poly_b)
 
-    ctr_2d  = project_points_cam(K, dist, traj_c)
-    left_2d = project_points_cam(K, dist, left_c)
-    right_2d= project_points_cam(K, dist, right_c)
-    poly_2d = project_points_cam(K, dist, poly_c)
-    # Project to image
+        ctr_2d  = project_points_cam(K, dist, traj_c)
+        left_2d = project_points_cam(K, dist, left_c)
+        right_2d= project_points_cam(K, dist, right_c)
+        poly_2d = project_points_cam(K, dist, poly_c)
+        # Project to image
 
-    if current_img is None:
-        return
-    img = current_img.copy()
+        if current_img is None:
+            return
+        img = current_img.copy()
 
 
-    draw_polyline(img, ctr_2d, 2, COLOR_PATH)
-    draw_corridor(img, poly_2d, left_2d, right_2d, 
-                  fill_alpha=0.35, fill_color=COLOR_PATH, edge_color=COLOR_PATH, edge_thickness=2)
-    
-    cv2.circle(img, (int(u), int(v)), 5, COLOR_CLICK, -1)
+        draw_polyline(img, ctr_2d, 2, COLOR_PATH)
+        draw_corridor(img, poly_2d, left_2d, right_2d, 
+                    fill_alpha=0.35, fill_color=COLOR_PATH, edge_color=COLOR_PATH, edge_thickness=2)
+        
+        cv2.circle(img, (int(u), int(v)), 5, COLOR_CLICK, -1)
+    else:
+        ## transclucent red overlay for stop
+        img = current_img.copy()
+        overlay = img.copy()
+        overlay[:] = (0,0,255)
+        img[:] = cv2.addWeighted(overlay, 0.3, img, 0.7, 0)
+
     cv2.imshow(window, img)
 
 def verify_annotations():
@@ -277,9 +287,16 @@ def verify_annotations():
                 cv_img = bridge.compressed_imgmsg_to_cv2(msg, desired_encoding='bgr8')
                 sub_goal = annotation_item.get("goal_base")
                 sub_goal = [sub_goal["x"], sub_goal["y"], sub_goal["z"]]
-                width_m = annotation_item.get("robot_width")
-                u = annotation_item.get("click")["u"]
-                v = annotation_item.get("click")["v"]
+                width_m = annotation_item.get("robot_width", 0.5)
+
+                stop = annotation_item.get("stop", False)
+
+                if stop:
+                    u, v = 0,0
+                else:
+                    u = annotation_item.get("click")["u"]
+                    v = annotation_item.get("click")["v"]
+                
                 r = annotation_item.get("arc")["r"]
                 theta = annotation_item.get("arc")["theta"]
                 
@@ -291,7 +308,8 @@ def verify_annotations():
                                              sub_goal=sub_goal, 
                                              width_m=width_m,
                                              u=u,
-                                             v=v))
+                                             v=v,
+                                             stop=stop))
             i = 0
             while 0 <= i < len(frame_items):
                 fr = frame_items[i]
@@ -307,5 +325,6 @@ def verify_annotations():
                 else:
                     continue
     cv2.destroyAllWindows()
+
 if __name__ == "__main__":
     verify_annotations()
