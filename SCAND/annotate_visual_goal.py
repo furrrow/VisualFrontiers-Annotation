@@ -23,7 +23,7 @@ from cv_bridge import CvBridge
 # ===========================
 
 bag_dir = "SCAND/rosbags"   # Point to path with rosbags being annotated for the day
-bag_idx = 4
+bag_idx = 0
 annotate_n_bags = 1
 annotations_root = "./SCAND/Annotations"
 calib_path = "./SCAND/tf.json"
