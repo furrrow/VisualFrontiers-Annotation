@@ -3,6 +3,7 @@
 /SCAND/rosbags/*
 #Tracking directory
 !/SCAND/Annotations/.gitkeep
+!/SCAND/rosbags/.gitkeep
 
 # python
 __pycache__
