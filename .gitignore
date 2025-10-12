@@ -1,5 +1,11 @@
 # Ignore everything inside the Annotations directory
-/SCAND/Annotations/**
-
+/SCAND/Annotations/*
+/SCAND/rosbags/*
 #Tracking directory
 !/SCAND/Annotations/.gitkeep
+
+# python
+__pycache__
+*.pyc
+*.egg-info
+dist

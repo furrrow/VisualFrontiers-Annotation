@@ -22,10 +22,12 @@ from cv_bridge import CvBridge
 # Configs
 # ===========================
 
-bag_dir = "/media/beast-gamma/Media/Datasets/SCAND/annt"   # Point to path with rosbags being annotated for the day
-annotations_root = "./Annotations"
-calib_path = "./tf.json"
-skip_json_path = "./bags_to_skip.json"
+bag_dir = "SCAND/rosbags"   # Point to path with rosbags being annotated for the day
+bag_idx = 4
+annotate_n_bags = 1
+annotations_root = "./SCAND/Annotations"
+calib_path = "./SCAND/tf.json"
+skip_json_path = "./SCAND/bags_to_skip.json"
 
 fx, fy, cx, cy = 640.0, 637.0, 640.0, 360.0                   #  SCAND Kinect intrinsics ### DO NOT CHANGE
 T_horizon = 2.0      # Path generation options
@@ -258,9 +260,9 @@ class Annotator:
         self.T_cam_from_base = np.linalg.inv(self.T_base_from_cam)
         self.bridge = CvBridge()
 
-        self.window = "SCAND Annotator"
-        cv2.namedWindow(self.window, cv2.WINDOW_NORMAL)
-        cv2.setMouseCallback(self.window, self.on_mouse)
+        self.window_name = "SCAND Annotator"
+        cv2.namedWindow(self.window_name, cv2.WINDOW_NORMAL)
+        cv2.setMouseCallback(self.window_name, self.on_mouse)
 
         self.current_img = None
         self.current_img_show = None
@@ -376,7 +378,8 @@ class Annotator:
             self.last_carry_robot_width = robot_width
             self.last_selection_record = (r, theta, v, w, robot_width)
 
-            print(f"[INFO] Timestamp : {self.frame_stamp}, Click {(x,y)} → base ({xb:.3f},{yb:.3f}), r={r:.3f}, θ={np.rad2deg(theta):.3f}, v={v:.3f}, ω={w:.3f}, ")
+            print(f"[INFO] Frame : {self.frame_idx} / {len(self.frames)}, Click {(x,y)} → base ({xb:.3f},{yb:.3f}), r={r:.3f}, θ={np.rad2deg(theta):.3f}, v={v:.3f}, ω={w:.3f}, ")
+
             self.redraw()
 
     def redraw(self):
@@ -405,7 +408,7 @@ class Annotator:
             cv2.circle(img, (int(self.current_click_uv[0]), int(self.current_click_uv[1])), 5, COLOR_CLICK, -1)
 
         self.current_img_show = img
-        cv2.imshow(self.window, self.current_img_show)
+        cv2.imshow(self.window_name, self.current_img_show)
 
     def log_frame(self):
         if self.bag_doc is None:
@@ -467,9 +470,9 @@ class Annotator:
                 self.image_topic = "/image_raw/compressed"
             
             print(f"[INFO] Using image topic: {self.image_topic}")
-
+            # print(bag.get_type_and_topic_info()[1][self.image_topic])
+            # total_len = bag.get_type_and_topic_info()[1][self.image_topic].message_count
             for i, (topic, msg, t) in enumerate(bag.read_messages(topics=[self.image_topic])):
-
                 if i % undersampling_factor != 0:
                     continue
 
@@ -545,6 +548,8 @@ class Annotator:
 
     def run(self):
         bag_files = sorted(glob.glob(os.path.join(bag_dir, "*.bag")))
+        if bag_idx is not None:
+            bag_files = bag_files[bag_idx: bag_idx+annotate_n_bags]
 
         with open(skip_json_path, 'r') as f:
             bags_to_skip = json.load(f)

@@ -8,12 +8,13 @@ from dataclasses import dataclass
 from typing import Tuple, Optional
 import math
 
-bagfile_root = "/media/beast-gamma/Media/Datasets/SCAND/rosbags/"
-annotations_root = "./Annotations"
+bagfile_root = "SCAND/rosbags"
+bag_idx = 4
+annotations_root = "/home/jim/Downloads/unverified"
 fx, fy, cx, cy = 640.0, 637.0, 640.0, 360.0                   #  SCAND Kinect intrinsics ### DO NOT CHANGE
 T_horizon = 2.0      # Path generation options
 num_t_samples = 1000
-calib_path = "./tf.json"
+calib_path = "./SCAND/tf.json"
 
 COLOR_PATH = (0, 0, 255) #red
 COLOR_CLICK = (255, 0, 0) #green
@@ -322,6 +323,10 @@ def verify_annotations():
                 elif key == 81:  # Left Arrow → go back one (no save)
                     print("[INFO] Back one frame.")
                     i = max(0, i - 1)
+                
+                elif: key in (ord('q'), 27):   # q or ESC
+                    print("[INFO] Quit requested.")
+                    return
                 else:
                     continue
     cv2.destroyAllWindows()
