@@ -1,5 +1,8 @@
 import os
 import json
+import math
+import numpy as np
+import csv
 
 def get_existing_bags(path):
     existing_bags = []
@@ -44,3 +47,15 @@ def get_topics_from_bag(bag_path):
 def write_dict_to_json(data_dict, output_path):
     with open(output_path, 'w') as json_file:
         json.dump(data_dict, json_file, indent=4)
+
+def ensure_csv_has_header(path):
+    exists = os.path.exists(path)
+    if not exists or os.path.getsize(path) == 0:
+        with open(path, "w", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(["bag_name", "oov_count", "total_count"])
+
+def append_csv_row(path, bag_name, oov_count, total_count):
+    with open(path, "a", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow([bag_name, oov_count, total_count])
