@@ -139,6 +139,10 @@ class TemporalAnnotator:
         self.annotator_goal = None
         self.initial_choice = None
         self.timed_exit = False
+        self.stop = False
+
+        self.current_pos = None
+        self.current_yaw = None
 
     def _get_timestamps_from_expert_annotations(self):
         timestamps = []
@@ -263,7 +267,10 @@ class TemporalAnnotator:
             "robot_width": self.robot_width,
             "paths": paths_dict,
             "preference": ranking,
-            "pairwise": self.prefs_this_frame
+            "pairwise": self.prefs_this_frame, 
+            "position": self.current_pos,
+            "yaw" : self.current_yaw,
+            "stop": self.stop
         }
 
     def process_odom(self, msg):
@@ -366,12 +373,12 @@ class TemporalAnnotator:
                 raise Exception
 
             self.annotator_goal = np.array([annotator_goal['x'], annotator_goal['y'], annotator_goal['z']])
-
             expert_path = make_offset_path_to_point(self.path, self.yaws, self.annotator_goal, self.cum_dists)
+            self.stop = False
         else:
-            print("HMm")
+            # print("HMm")
             expert_path = np.zeros((10,3), dtype=np.float32)
-
+            self.stop = True
         return left_offset_path, right_offset_path, expert_path
     
     def compute_path(self):

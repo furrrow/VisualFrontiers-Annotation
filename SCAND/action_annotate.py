@@ -215,6 +215,7 @@ class Annotator:
         if self.bag_doc is None:
             raise RuntimeError("bag doc not open")
         if not (self.last_click_uv and self.last_target_base and self.last_selection_record):
+            self.log_stop()
             return
         
         u, v = self.last_click_uv

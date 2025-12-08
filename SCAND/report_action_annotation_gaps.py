@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import List, Tuple
 
 # Directory containing action annotations
-ACTION_ANNOTATIONS_DIR = "./ActionAnnotations"
+ACTION_ANNOTATIONS_DIR = "/media/beast-gamma/Media/Datasets/SCAND/ActionAnnotations"
 # Where to write the CSV report
 OUTPUT_CSV = Path(__file__).parent / "action_annotation_gaps.csv"
 # Maximum expected step between annotated frame_idx values

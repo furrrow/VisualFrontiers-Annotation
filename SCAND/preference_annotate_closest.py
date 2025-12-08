@@ -50,7 +50,7 @@ class TemporalAnnotatorClosest(BaseTemporalAnnotator):
 
         return dist_1<dist_2
 
-    def compute_ranking(self):
+    def _compute_ranking(self):
         """
         Preference ordering:
           3: annotator-selected path (always best)
@@ -69,25 +69,6 @@ class TemporalAnnotatorClosest(BaseTemporalAnnotator):
         else:
             rankings.extend([2, 1])
         return rankings
-
-    def log_frame(self):
-        if self.bag_doc is None or self.frame_stamp is None:
-            return
-        stamp_key = str(self.frame_stamp)
-
-        paths_dict = {}
-        for idx, pitem in enumerate(self.paths[:4]):  # ensure 0..4 exist
-            paths_dict[str(idx)] = self._path_item_to_dict(pitem, self.frame_stamp)
-
-        ranking = self.compute_ranking()
-
-        self.bag_doc["annotations_by_stamp"][stamp_key] = {
-            "frame_idx": int(self.frame_idx),
-            "robot_width": self.robot_width,
-            "paths": paths_dict,
-            "preference": ranking,
-            "pairwise": self.prefs_this_frame
-        }
 
     def process_bag(self, undersampling_factor):
         
@@ -125,6 +106,9 @@ class TemporalAnnotatorClosest(BaseTemporalAnnotator):
                 self.frame_idx = i
                 self.frame_stamp = fr.stamp
                 self.current_img = fr.img
+                self.current_pos = list(fr.position)
+                self.current_yaw = fr.yaw
+
                 self.reset()
 
                 self.path, self.yaws, self.cum_dists = self.compute_path()
@@ -152,7 +136,7 @@ if __name__ == "__main__":
     # Configs
     # ===========================
 
-    bag_dir = "/media/beast-gamma/Media/Datasets/SCAND/annt"   # Point to path with rosbags being annotated for the day
+    bag_dir = "/media/beast-gamma/Media/Datasets/SCAND/rosbags"   # Point to path with rosbags being annotated for the day
     expert_action_annotation_dir = "/media/beast-gamma/Media/Datasets/SCAND/ActionAnnotations"
     annotations_root = "./Annotations_closest"
     calib_path = "./tf.json"
